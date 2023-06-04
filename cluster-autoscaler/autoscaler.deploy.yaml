@@ -42,8 +42,8 @@ spec:
             requests:
               cpu: 100m
               memory: 300Mi
-          # --nodes=min:max:instance type:location:pool
-          # Pool name will add tags to created nodes
+          # --nodes=min:max:instance_type:location:pool
+          # Pool name adds tags to created nodes
           command:
             - ./cluster-autoscaler
             - --cloud-provider=hetzner
@@ -66,9 +66,9 @@ spec:
             value: <image name>
           - name: HCLOUD_FIREWALL
             value: <firewall name>
-          # If you does not need public IP
-          - name: HCLOUD_PUBLIC_IPV4
-            value: 'false'
+          # If you don't not need public IP
+          # - name: HCLOUD_PUBLIC_IPV4
+          #   value: 'false'
           - name: HCLOUD_PUBLIC_IPV6
             value: 'false'
 

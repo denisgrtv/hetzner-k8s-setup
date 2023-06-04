@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: echoserver-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-stage"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - <your_domain>
+    secretName: echoserver-letsencrypt
+  rules:
+  - host: <your_domain>
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: echoserver-svc
+            port:
+              number: 80

@@ -1,8 +1,8 @@
 #!/bin/bash
 # Initializing cluster
 kubeadm init \
---control-plane-endpoint=<node_or_load_balancer_ip> \
---apiserver-advertise-address=<node_ip> \
+--control-plane-endpoint=10.0.0.2 \
+--apiserver-advertise-address=10.0.0.2 \
 --cri-socket=unix:///var/run/cri-dockerd.sock \
 --pod-network-cidr=10.244.0.0/16
 
@@ -19,10 +19,12 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.22.0
 
 # Patching network becouse it can't start without cloud controller
 kubectl -n kube-flannel patch ds kube-flannel-ds --type json -p '[{"op":"add","path":"/spec/template/spec/tolerations/-","value":{"key":"node.cloudprovider.kubernetes.io/uninitialized","value":"true","effect":"NoSchedule"}}]'
+# Also you can add parameter --iface-can-reach=<master_node_ip> for networking with private interfaces
 
-kubectl -n kube-system create secret generic hcloud --from-literal=token=<hetzner token> --from-literal=network=<hetnzer private network name>
+kubectl -n kube-system create secret generic hcloud --from-literal=token=JkHOs20pkFcIuf4ATDQCkknM6DuLNDFiax6qyXOS2uWBkkBgD3DRCD1OsHIWKdNd --from-literal=network=k8s-network
 
 kubectl apply -f https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/download/v1.15.0/ccm-networks.yaml
+
 
 # After cloud controller initialization restart node or flannel services for network settings update
 
@@ -47,7 +49,7 @@ kubectl apply -f https://github.com/hetznercloud/hcloud-cloud-controller-manager
 # see https://github.com/hetznercloud/csi-driver/blob/main/docs/kubernetes/README.md
 kubectl apply -f https://raw.githubusercontent.com/hetznercloud/csi-driver/v2.3.2/deploy/kubernetes/hcloud-csi.yml
 # (Optional) Sticking CSI controller to master node
-kubectl -n kube-system patch deploy hcloud-csi-controller --type json -p '[{"op":"add","path":"/spec/template/spec/tolerations/-","value":{"key":"node-role.kubernetes.io/control-plane","effect":"NoSchedule"}}]'
+kubectl -n kube-system patch deploy hcloud-csi-controller --patch '{"spec": {"template": {"spec": {"tolerations": [{"key": "node-role.kubernetes.io/control-plane","operator": "Exists"}]}}}}'
 kubectl -n kube-system patch deploy hcloud-csi-controller --patch '{"spec": {"template": {"spec": {"affinity": {"nodeAffinity": {"requiredDuringSchedulingIgnoredDuringExecution": {"nodeSelectorTerms": [{"matchExpressions": [{"key": "node-role.kubernetes.io/control-plane","operator": "Exists"}]}]}}}}}}}'
 
 # (Optional) Allow run pods on master node

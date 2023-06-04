@@ -32,3 +32,4 @@ For this step you can use web cloud console or [hcloud cli](https://github.com/h
 - Follow [cloud-init-master.sh](./cloud-init-master.sh)
 - Add base64 encoded join command to autoscaler (ex. in [cloud-init-worker.sh](./cloud-init-worker.sh))
 - Test your setup with [echoserver](./echoserver) deployment
+- (Optional) Install [addons](./addons/)
